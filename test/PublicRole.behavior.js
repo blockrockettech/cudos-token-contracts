@@ -72,36 +72,6 @@ function shouldBehaveLikePublicRole(authorized, otherAuthorized, [other], rolena
             });
         });
 
-        describe('remove', function () {
-            // Non-managed roles have no restrictions on the mocked '_remove' function (exposed via 'remove').
-            const from = manager || other;
-
-            context(`from ${manager ? 'the manager' : 'any'} account`, function () {
-                it('removes role from an already assigned account', async function () {
-                    await this.token[`remove${rolename}`](authorized, {from});
-                    (await this.token[`is${rolename}`](authorized)).should.equal(false);
-                    (await this.token[`is${rolename}`](otherAuthorized)).should.equal(true);
-                });
-
-                it(`emits a ${rolename}Removed event`, async function () {
-                    const {logs} = await this.token[`remove${rolename}`](authorized, {from});
-                    expectEvent.inLogs(logs, `${rolename}Removed`, {account: authorized});
-                });
-
-                it('reverts when removing from an unassigned account', async function () {
-                    await shouldFail.reverting.withMessage(this.token[`remove${rolename}`](other, {from}),
-                        'Roles: account does not have role'
-                    );
-                });
-
-                it('reverts when removing role from the null account', async function () {
-                    await shouldFail.reverting.withMessage(this.token[`remove${rolename}`](ZERO_ADDRESS, {from}),
-                        'Roles: account is the zero address'
-                    );
-                });
-            });
-        });
-
         describe('renouncing roles', function () {
             it('renounces an assigned role', async function () {
                 await this.token[`renounce${rolename}`]({from: authorized});

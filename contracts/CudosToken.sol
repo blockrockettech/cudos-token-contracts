@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/access/roles/WhitelistedRole.sol";
 
 contract CudosToken is ERC20, ERC20Detailed, WhitelistedRole {
+
+    bool public transfersEnabled = false;
+
     constructor () public ERC20Detailed("CudosToken", "CUDOS", 18) {
         _mint(msg.sender, 10000000000  * (10 ** uint256(decimals())));
     }
@@ -22,17 +25,10 @@ contract CudosToken is ERC20, ERC20Detailed, WhitelistedRole {
         return super.transferFrom(sender, recipient, amount);
     }
 
-    function enableTransfers() public view onlyWhitelistAdmin {
-        // solhint-disable-previous-line no-empty-blocks
-    }
+    function enableTransfers() external onlyWhitelistAdmin {
+        require(!transfersEnabled, "Transfers have been enabled");
 
-    // FIXME do we need this?
-    function removeWhitelistAdmin(address account) public {
-        _removeWhitelistAdmin(account);
-    }
-
-    function _removeWhitelistAdmin(address account) internal {
-        super._removeWhitelistAdmin(account);
+        transfersEnabled = true;
     }
 }
 

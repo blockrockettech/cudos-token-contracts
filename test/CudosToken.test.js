@@ -23,6 +23,7 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
     const ONE_TOKEN = new BN(1).mul(new BN(10).pow(new BN(DECIMALS)));
 
     beforeEach(async function () {
+        // cudos is added as a WhitelistedAdmin doing construction
         this.token = await CudosToken.new({from: cudos});
 
         await this.token.addWhitelistAdmin(otherWhitelistAdmin, {from: cudos});
@@ -287,4 +288,34 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
 
     // Whitelisted
     shouldBehaveLikePublicRole(partner, otherPartner, otherAccounts, 'Whitelisted', cudos);
+
+    describe('remove whitelised role', function () {
+        const rolename = 'Whitelisted';
+        const from = cudos;
+
+        context(`from cudos account`, function () {
+            it('removes role from an already assigned account', async function () {
+                await this.token[`remove${rolename}`](partner, {from});
+                (await this.token[`is${rolename}`](partner)).should.equal(false);
+                (await this.token[`is${rolename}`](otherPartner)).should.equal(true);
+            });
+
+            it(`emits a ${rolename}Removed event`, async function () {
+                const {logs} = await this.token[`remove${rolename}`](partner, {from});
+                expectEvent.inLogs(logs, `${rolename}Removed`, {account: partner});
+            });
+
+            it('reverts when removing from an unassigned account', async function () {
+                await shouldFail.reverting.withMessage(this.token[`remove${rolename}`](anotherAccount, {from}),
+                    'Roles: account does not have role'
+                );
+            });
+
+            it('reverts when removing role from the null account', async function () {
+                await shouldFail.reverting.withMessage(this.token[`remove${rolename}`](ZERO_ADDRESS, {from}),
+                    'Roles: account is the zero address'
+                );
+            });
+        });
+    });
 });
