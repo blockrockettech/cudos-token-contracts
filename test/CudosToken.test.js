@@ -18,7 +18,8 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
     const NAME = 'CudosToken';
     const SYMBOL = 'CUDOS';
     const DECIMALS = 18;
-    const initialSupply = new BN(10000000000).mul(new BN(10).pow(new BN(DECIMALS)));
+    const ONE_HUNDRED_BILLION = new BN(100000000000);
+    const initialSupply = ONE_HUNDRED_BILLION.mul(new BN(10).pow(new BN(DECIMALS)));
 
     const ONE_TOKEN = new BN(1).mul(new BN(10).pow(new BN(DECIMALS)));
 
@@ -260,6 +261,48 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
     describe('_approve', function () {
         shouldBehaveLikeERC20Approve('ERC20', cudos, partner, initialSupply, function (owner, spender, amount) {
             return this.token.approve(spender, amount, {from: cudos});
+        });
+    });
+
+    describe('enable transfers', function () {
+        context('from authorized account', function () {
+            const from = cudos;
+
+            it('allows access', async function () {
+                (await this.token.transfersEnabled()).should.equal(false);
+
+                await this.token.enableTransfers({from});
+
+                (await this.token.transfersEnabled()).should.equal(true);
+            });
+
+            it('can only be called once', async function () {
+                (await this.token.transfersEnabled()).should.equal(false);
+
+                await this.token.enableTransfers({from});
+
+                (await this.token.transfersEnabled()).should.equal(true);
+
+                await shouldFail.reverting.withMessage(this.token.enableTransfers({from}),
+                    `Transfers have been enabled`
+                );
+
+                (await this.token.transfersEnabled()).should.equal(true);
+            });
+        });
+
+        context('from unauthorized account', function () {
+            const from = partner;
+
+            it('reverts', async function () {
+                (await this.token.transfersEnabled()).should.equal(false);
+
+                await shouldFail.reverting.withMessage(this.token.enableTransfers({from}),
+                    `WhitelistAdminRole: caller does not have the WhitelistAdmin role`
+                );
+
+                (await this.token.transfersEnabled()).should.equal(false);
+            });
         });
     });
 
