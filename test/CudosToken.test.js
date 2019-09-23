@@ -9,9 +9,11 @@ const {
     shouldBehaveLikeERC20Approve,
 } = require('./ERC20.behavior');
 
+const {shouldBehaveLikePublicRole} = require('./PublicRole.behavior');
+
 const CudosToken = artifacts.require('CudosToken');
 
-contract('ERC20', function ([_, initialHolder, recipient, anotherAccount]) {
+contract('ERC20', function ([_, initialHolder, recipient, anotherAccount, otherWhitelistAdmin, ...otherAccounts]) {
 
     const NAME = 'CudosToken';
     const SYMBOL = 'CUDOS';
@@ -20,6 +22,8 @@ contract('ERC20', function ([_, initialHolder, recipient, anotherAccount]) {
 
     beforeEach(async function () {
         this.token = await CudosToken.new({from: initialHolder});
+
+        await this.token.addWhitelistAdmin(otherWhitelistAdmin, {from: initialHolder});
     });
 
     it('has a name', async function () {
@@ -219,4 +223,6 @@ contract('ERC20', function ([_, initialHolder, recipient, anotherAccount]) {
             return this.token.approve(spender, amount, {from: initialHolder});
         });
     });
+
+    shouldBehaveLikePublicRole(initialHolder, otherWhitelistAdmin, otherAccounts, 'WhitelistAdmin');
 });

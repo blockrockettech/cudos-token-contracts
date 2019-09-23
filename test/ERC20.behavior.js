@@ -1,9 +1,10 @@
-const { BN, constants, expectEvent, shouldFail } = require('openzeppelin-test-helpers');
-const { ZERO_ADDRESS } = constants;
+const {BN, constants, expectEvent, shouldFail} = require('openzeppelin-test-helpers');
+const {ZERO_ADDRESS} = constants;
 
 const should = require('chai').should();
 
-function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recipient, anotherAccount) {
+function shouldBehaveLikeERC20(errorPrefix, initialSupply, initialHolder, recipient, anotherAccount) {
+
     describe('total supply', function () {
         it('returns the total amount of tokens', async function () {
             (await this.token.totalSupply()).should.be.bignumber.equal(initialSupply);
@@ -27,7 +28,7 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
     describe('transfer', function () {
         shouldBehaveLikeERC20Transfer(errorPrefix, initialHolder, recipient, initialSupply,
             function (from, to, value) {
-                return this.token.transfer(to, value, { from });
+                return this.token.transfer(to, value, {from});
             }
         );
     });
@@ -43,14 +44,14 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
 
                 describe('when the spender has enough approved balance', function () {
                     beforeEach(async function () {
-                        await this.token.approve(spender, initialSupply, { from: initialHolder });
+                        await this.token.approve(spender, initialSupply, {from: initialHolder});
                     });
 
                     describe('when the token owner has enough balance', function () {
                         const amount = initialSupply;
 
                         it('transfers the requested amount', async function () {
-                            await this.token.transferFrom(tokenOwner, to, amount, { from: spender });
+                            await this.token.transferFrom(tokenOwner, to, amount, {from: spender});
 
                             (await this.token.balanceOf(tokenOwner)).should.be.bignumber.equal('0');
 
@@ -58,13 +59,13 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
                         });
 
                         it('decreases the spender allowance', async function () {
-                            await this.token.transferFrom(tokenOwner, to, amount, { from: spender });
+                            await this.token.transferFrom(tokenOwner, to, amount, {from: spender});
 
                             (await this.token.allowance(tokenOwner, spender)).should.be.bignumber.equal('0');
                         });
 
                         it('emits a transfer event', async function () {
-                            const { logs } = await this.token.transferFrom(tokenOwner, to, amount, { from: spender });
+                            const {logs} = await this.token.transferFrom(tokenOwner, to, amount, {from: spender});
 
                             expectEvent.inLogs(logs, 'Transfer', {
                                 from: tokenOwner,
@@ -74,7 +75,7 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
                         });
 
                         it('emits an approval event', async function () {
-                            const { logs } = await this.token.transferFrom(tokenOwner, to, amount, { from: spender });
+                            const {logs} = await this.token.transferFrom(tokenOwner, to, amount, {from: spender});
 
                             expectEvent.inLogs(logs, 'Approval', {
                                 owner: tokenOwner,
@@ -89,7 +90,7 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
 
                         it('reverts', async function () {
                             await shouldFail.reverting.withMessage(this.token.transferFrom(
-                                tokenOwner, to, amount, { from: spender }), 'SafeMath: subtraction overflow'
+                                tokenOwner, to, amount, {from: spender}), 'SafeMath: subtraction overflow'
                             );
                         });
                     });
@@ -97,7 +98,7 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
 
                 describe('when the spender does not have enough approved balance', function () {
                     beforeEach(async function () {
-                        await this.token.approve(spender, initialSupply.subn(1), { from: tokenOwner });
+                        await this.token.approve(spender, initialSupply.subn(1), {from: tokenOwner});
                     });
 
                     describe('when the token owner has enough balance', function () {
@@ -105,7 +106,7 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
 
                         it('reverts', async function () {
                             await shouldFail.reverting.withMessage(this.token.transferFrom(
-                                tokenOwner, to, amount, { from: spender }), 'SafeMath: subtraction overflow'
+                                tokenOwner, to, amount, {from: spender}), 'SafeMath: subtraction overflow'
                             );
                         });
                     });
@@ -115,7 +116,7 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
 
                         it('reverts', async function () {
                             await shouldFail.reverting.withMessage(this.token.transferFrom(
-                                tokenOwner, to, amount, { from: spender }), 'SafeMath: subtraction overflow'
+                                tokenOwner, to, amount, {from: spender}), 'SafeMath: subtraction overflow'
                             );
                         });
                     });
@@ -127,12 +128,12 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
                 const to = ZERO_ADDRESS;
 
                 beforeEach(async function () {
-                    await this.token.approve(spender, amount, { from: tokenOwner });
+                    await this.token.approve(spender, amount, {from: tokenOwner});
                 });
 
                 it('reverts', async function () {
                     await shouldFail.reverting.withMessage(this.token.transferFrom(
-                        tokenOwner, to, amount, { from: spender }), `${errorPrefix}: transfer to the zero address`
+                        tokenOwner, to, amount, {from: spender}), `${errorPrefix}: transfer to the zero address`
                     );
                 });
             });
@@ -145,7 +146,7 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
 
             it('reverts', async function () {
                 await shouldFail.reverting.withMessage(this.token.transferFrom(
-                    tokenOwner, to, amount, { from: spender }), `${errorPrefix}: transfer from the zero address`
+                    tokenOwner, to, amount, {from: spender}), `${errorPrefix}: transfer from the zero address`
                 );
             });
         });
@@ -154,13 +155,13 @@ function shouldBehaveLikeERC20 (errorPrefix, initialSupply, initialHolder, recip
     describe('approve', function () {
         shouldBehaveLikeERC20Approve(errorPrefix, initialHolder, recipient, initialSupply,
             function (owner, spender, amount) {
-                return this.token.approve(spender, amount, { from: owner });
+                return this.token.approve(spender, amount, {from: owner});
             }
         );
     });
 }
 
-function shouldBehaveLikeERC20Transfer (errorPrefix, from, to, balance, transfer) {
+function shouldBehaveLikeERC20Transfer(errorPrefix, from, to, balance, transfer) {
     describe('when the recipient is not the zero address', function () {
         describe('when the sender does not have enough balance', function () {
             const amount = balance.addn(1);
@@ -184,7 +185,7 @@ function shouldBehaveLikeERC20Transfer (errorPrefix, from, to, balance, transfer
             });
 
             it('emits a transfer event', async function () {
-                const { logs } = await transfer.call(this, from, to, amount);
+                const {logs} = await transfer.call(this, from, to, amount);
 
                 expectEvent.inLogs(logs, 'Transfer', {
                     from,
@@ -206,7 +207,7 @@ function shouldBehaveLikeERC20Transfer (errorPrefix, from, to, balance, transfer
             });
 
             it('emits a transfer event', async function () {
-                const { logs } = await transfer.call(this, from, to, amount);
+                const {logs} = await transfer.call(this, from, to, amount);
 
                 expectEvent.inLogs(logs, 'Transfer', {
                     from,
@@ -226,13 +227,13 @@ function shouldBehaveLikeERC20Transfer (errorPrefix, from, to, balance, transfer
     });
 }
 
-function shouldBehaveLikeERC20Approve (errorPrefix, owner, spender, supply, approve) {
+function shouldBehaveLikeERC20Approve(errorPrefix, owner, spender, supply, approve) {
     describe('when the spender is not the zero address', function () {
         describe('when the sender has enough balance', function () {
             const amount = supply;
 
             it('emits an approval event', async function () {
-                const { logs } = await approve.call(this, owner, spender, amount);
+                const {logs} = await approve.call(this, owner, spender, amount);
 
                 expectEvent.inLogs(logs, 'Approval', {
                     owner: owner,
@@ -266,7 +267,7 @@ function shouldBehaveLikeERC20Approve (errorPrefix, owner, spender, supply, appr
             const amount = supply.addn(1);
 
             it('emits an approval event', async function () {
-                const { logs } = await approve.call(this, owner, spender, amount);
+                const {logs} = await approve.call(this, owner, spender, amount);
 
                 expectEvent.inLogs(logs, 'Approval', {
                     owner: owner,
