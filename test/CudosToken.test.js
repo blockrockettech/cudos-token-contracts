@@ -20,6 +20,8 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
     const DECIMALS = 18;
     const initialSupply = new BN(10000000000).mul(new BN(10).pow(new BN(DECIMALS)));
 
+    const ONE_TOKEN = new BN(1).mul(new BN(10).pow(new BN(DECIMALS)));
+
     beforeEach(async function () {
         this.token = await CudosToken.new({from: cudos});
 
@@ -219,6 +221,38 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
     describe('_transfer', function () {
         shouldBehaveLikeERC20Transfer('ERC20', cudos, partner, initialSupply, function (from, to, amount) {
             return this.token.transfer(to, amount, {from: cudos});
+        });
+
+        it('reverts as not authorised to transfer via whitelist', async function () {
+            await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos}); // ensure anotherAccount has a balance
+
+            (await this.token.balanceOf(anotherAccount)).should.be.bignumber.equal(ONE_TOKEN);
+
+            await shouldFail.reverting.withMessage(
+                this.token.transfer(cudos, ONE_TOKEN, {from: anotherAccount}), 'Caller can not currently transfer'
+            );
+        });
+    });
+
+    describe('_transferFrom', function () {
+        it('reverts as not authorised to transferFrom via whitelist', async function () {
+            await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos}); // ensure anotherAccount has a balance
+
+            (await this.token.balanceOf(anotherAccount)).should.be.bignumber.equal(ONE_TOKEN);
+
+            await shouldFail.reverting.withMessage(
+                this.token.transferFrom(anotherAccount, cudos, ONE_TOKEN, {from: anotherAccount}), 'Caller can not currently transfer'
+            );
+        });
+
+        it('transferFrom via whitelisted caller (who has been approved the required allowance)', async function () {
+            await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos}); // ensure anotherAccount has a balance
+
+            await this.token.approve(partner, ONE_TOKEN, {from: anotherAccount});
+            (await this.token.allowance(anotherAccount, partner)).should.be.bignumber.equal(ONE_TOKEN);
+
+            // partner can send tokens as whitelisted and approved
+            await this.token.transferFrom(anotherAccount, cudos, 1, {from: partner});
         });
     });
 
