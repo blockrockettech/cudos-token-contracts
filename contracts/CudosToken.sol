@@ -3,10 +3,10 @@ pragma solidity ^0.5.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import "@openzeppelin/contracts/access/roles/WhitelistAdminRole.sol";
+import "@openzeppelin/contracts/access/roles/WhitelistedRole.sol";
 
 
-contract CudosToken is ERC20, ERC20Detailed, WhitelistAdminRole {
+contract CudosToken is ERC20, ERC20Detailed, WhitelistedRole {
     constructor () public ERC20Detailed("CudosToken", "CUDOS", 18) {
         _mint(msg.sender, 10000000000  * (10 ** uint256(decimals())));
     }
@@ -23,11 +23,11 @@ contract CudosToken is ERC20, ERC20Detailed, WhitelistAdminRole {
         // solhint-disable-previous-line no-empty-blocks
     }
 
+    // FIXME do we need this?
     function removeWhitelistAdmin(address account) public {
         _removeWhitelistAdmin(account);
     }
 
-    // Causes a compilation error if super._removeWhitelistAdmin is not internal
     function _removeWhitelistAdmin(address account) internal {
         super._removeWhitelistAdmin(account);
     }

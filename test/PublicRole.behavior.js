@@ -44,26 +44,6 @@ function shouldBehaveLikePublicRole(authorized, otherAuthorized, [other], rolena
             );
         });
 
-        describe('access control', function () {
-            context('from authorized account', function () {
-                const from = authorized;
-
-                it('allows access', async function () {
-                    await this.token[`enableTransfers`]({from});
-                });
-            });
-
-            context('from unauthorized account', function () {
-                const from = other;
-
-                it('reverts', async function () {
-                    await shouldFail.reverting.withMessage(this.token[`enableTransfers`]({from}),
-                        `${rolename}Role: caller does not have the ${rolename} role`
-                    );
-                });
-            });
-        });
-
         describe('add', function () {
             const from = manager === undefined ? authorized : manager;
 

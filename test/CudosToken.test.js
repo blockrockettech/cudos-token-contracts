@@ -13,7 +13,7 @@ const {shouldBehaveLikePublicRole} = require('./PublicRole.behavior');
 
 const CudosToken = artifacts.require('CudosToken');
 
-contract('ERC20', function ([_, initialHolder, recipient, anotherAccount, otherWhitelistAdmin, ...otherAccounts]) {
+contract('ERC20', function ([_, initialHolder, recipient, anotherAccount, otherWhitelistAdmin, whitelisted, otherWhitelisted, ...otherAccounts]) {
 
     const NAME = 'CudosToken';
     const SYMBOL = 'CUDOS';
@@ -24,6 +24,9 @@ contract('ERC20', function ([_, initialHolder, recipient, anotherAccount, otherW
         this.token = await CudosToken.new({from: initialHolder});
 
         await this.token.addWhitelistAdmin(otherWhitelistAdmin, {from: initialHolder});
+
+        await this.token.addWhitelisted(whitelisted, {from: initialHolder});
+        await this.token.addWhitelisted(otherWhitelisted, {from: initialHolder});
     });
 
     it('has a name', async function () {
@@ -224,5 +227,29 @@ contract('ERC20', function ([_, initialHolder, recipient, anotherAccount, otherW
         });
     });
 
+    // WhitelistAdmin
     shouldBehaveLikePublicRole(initialHolder, otherWhitelistAdmin, otherAccounts, 'WhitelistAdmin');
+
+    describe('whitelist admin access control via modifier', function () {
+        context('from authorized account', function () {
+            const from = initialHolder;
+
+            it('allows access', async function () {
+                await this.token.enableTransfers({from});
+            });
+        });
+
+        context('from unauthorized account', function () {
+            const from = recipient;
+
+            it('reverts', async function () {
+                await shouldFail.reverting.withMessage(this.token.enableTransfers({from}),
+                    `WhitelistAdminRole: caller does not have the WhitelistAdmin role`
+                );
+            });
+        });
+    });
+
+    // Whitelisted
+    shouldBehaveLikePublicRole(whitelisted, otherWhitelisted, otherAccounts, 'Whitelisted', initialHolder);
 });
