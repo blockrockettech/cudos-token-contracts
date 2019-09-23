@@ -5,17 +5,20 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/access/roles/WhitelistedRole.sol";
 
-
 contract CudosToken is ERC20, ERC20Detailed, WhitelistedRole {
     constructor () public ERC20Detailed("CudosToken", "CUDOS", 18) {
         _mint(msg.sender, 10000000000  * (10 ** uint256(decimals())));
     }
 
     function transfer(address recipient, uint256 amount) public returns (bool) {
+        require(isWhitelisted(msg.sender), "Caller can not currently transfer");
+
         return super.transfer(recipient, amount);
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
+        require(isWhitelisted(msg.sender), "Caller can not currently transfer");
+
         return super.transferFrom(sender, recipient, amount);
     }
 
