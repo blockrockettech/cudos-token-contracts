@@ -1,0 +1,26 @@
+{
+  "name": "cudos-token-contracts",
+  "version": "1.0.0",
+  "description": "Cudos Smart Contracts",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test --network development",
+    "coverage": "./node_modules/.bin/solidity-coverage"
+  },
+  "author": "BlockRocket.tech",
+  "license": "MIT",
+  "devDependencies": {
+    "@openzeppelin/contracts": "^2.3.0",
+    "chai": "^4.2.0",
+    "eth-gas-reporter": "^0.2.11",
+    "openzeppelin-test-helpers": "^0.3.2",
+    "solidity-coverage": "github:rotcivegaf/solidity-coverage",
+    "truffle-flattener": "^1.4.2"
+  },
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^1.0.18",
+    "truffle": "^5.0.37"
+  }
+}
