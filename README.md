@@ -1,7 +1,5 @@
 # cudos-token
 
-Contracts are 
-
 ### Cudos Token Smart Contract
 
 * Is ERC20 compliant
