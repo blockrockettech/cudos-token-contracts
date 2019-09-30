@@ -225,14 +225,40 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
             return this.token.transfer(to, amount, {from: cudos});
         });
 
-        it('reverts as not authorised to transfer via whitelist', async function () {
-            await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos}); // ensure anotherAccount has a balance
+        context('when transfers are disabled', function () {
+            beforeEach(async function () {
+                (await this.token.transfersEnabled()).should.equal(false);
+            });
 
-            (await this.token.balanceOf(anotherAccount)).should.be.bignumber.equal(ONE_TOKEN);
+            it('reverts as not authorised to transfer via whitelist', async function () {
+                (await this.token.isWhitelisted(cudos)).should.be.true;
 
-            await shouldFail.reverting.withMessage(
-                this.token.transfer(cudos, ONE_TOKEN, {from: anotherAccount}), 'Caller can not currently transfer'
-            );
+                await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos}); // ensure anotherAccount has a balance
+
+                (await this.token.balanceOf(anotherAccount)).should.be.bignumber.equal(ONE_TOKEN);
+
+                (await this.token.isWhitelisted(anotherAccount)).should.be.false;
+                await shouldFail.reverting.withMessage(
+                    this.token.transfer(cudos, ONE_TOKEN, {from: anotherAccount}), 'Caller can not currently transfer'
+                );
+            });
+        });
+
+        context('when transfers are enabled', function () {
+            beforeEach(async function () {
+                await this.token.enableTransfers({from: cudos});
+                (await this.token.transfersEnabled()).should.equal(true);
+            });
+
+            it('should allow transfer for non-whitelisted token owner', async function () {
+                (await this.token.isWhitelisted(cudos)).should.be.true;
+                await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos}); // ensure anotherAccount has a balance
+
+                (await this.token.balanceOf(anotherAccount)).should.be.bignumber.equal(ONE_TOKEN);
+
+                (await this.token.isWhitelisted(anotherAccount)).should.be.false;
+                await this.token.transfer(cudos, ONE_TOKEN, {from: anotherAccount});
+            });
         });
     });
 
