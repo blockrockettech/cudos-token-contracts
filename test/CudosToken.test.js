@@ -13,7 +13,7 @@ const {shouldBehaveLikePublicRole} = require('./PublicRole.behavior');
 
 const CudosToken = artifacts.require('CudosToken');
 
-contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAdmin, otherPartner, ...otherAccounts]) {
+contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAdmin, otherPartner, random, ...otherAccounts]) {
 
     const NAME = 'CudosToken';
     const SYMBOL = 'CUDOS';
@@ -273,14 +273,52 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
             );
         });
 
-        it('transferFrom via whitelisted caller (who has been approved the required allowance)', async function () {
-            await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos}); // ensure anotherAccount has a balance
+        context('when transfers are disabled', function () {
+            beforeEach(async function () {
+                (await this.token.transfersEnabled()).should.equal(false);
+            });
 
-            await this.token.approve(partner, ONE_TOKEN, {from: anotherAccount});
-            (await this.token.allowance(anotherAccount, partner)).should.be.bignumber.equal(ONE_TOKEN);
+            it('transferFrom via whitelisted caller (who has been approved the required allowance)', async function () {
+                await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos}); // ensure anotherAccount has a balance
 
-            // partner can send tokens as whitelisted and approved
-            await this.token.transferFrom(anotherAccount, cudos, 1, {from: partner});
+                await this.token.approve(partner, ONE_TOKEN, {from: anotherAccount});
+                (await this.token.allowance(anotherAccount, partner)).should.be.bignumber.equal(ONE_TOKEN);
+
+                (await this.token.isWhitelisted(partner)).should.be.true;
+
+                // partner can send tokens as whitelisted and approved
+                await this.token.transferFrom(anotherAccount, cudos, 1, {from: partner});
+            });
+
+            it('reverts when caller is not whitelisted despite having an approved allowance', async function() {
+                await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos}); // ensure anotherAccount has a balance
+
+                await this.token.approve(random, ONE_TOKEN, {from: anotherAccount});
+                (await this.token.allowance(anotherAccount, random)).should.be.bignumber.equal(ONE_TOKEN);
+
+                (await this.token.isWhitelisted(random)).should.be.false;
+                await shouldFail.reverting(
+                    this.token.transferFrom(anotherAccount, cudos, 1, {from: random}),
+                    'Caller can not currently transfer'
+                );
+            });
+        });
+
+        context('when transfers are enabled', function () {
+            beforeEach(async function () {
+                await this.token.enableTransfers({from: cudos});
+                (await this.token.transfersEnabled()).should.equal(true);
+            });
+
+            it('transfers from a non-whitelisted caller', async function() {
+                await this.token.transfer(anotherAccount, ONE_TOKEN, {from: cudos});
+
+                await this.token.approve(random, ONE_TOKEN, {from: anotherAccount});
+                (await this.token.allowance(anotherAccount, random)).should.be.bignumber.equal(ONE_TOKEN);
+
+                (await this.token.isWhitelisted(random)).should.be.false;
+                await this.token.transferFrom(anotherAccount, cudos, 1, {from: random});
+            });
         });
     });
 
@@ -331,12 +369,6 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
             });
         });
     });
-
-    //TODO
-    
-    // test transfer and transferFrom
-
-    //TODO
 
     // WhitelistAdmin
     shouldBehaveLikePublicRole(cudos, otherWhitelistAdmin, otherAccounts, 'WhitelistAdmin');
