@@ -18,8 +18,8 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
     const NAME = 'CudosToken';
     const SYMBOL = 'CUDOS';
     const DECIMALS = 18;
-    const ONE_HUNDRED_BILLION = new BN(100000000000);
-    const initialSupply = ONE_HUNDRED_BILLION.mul(new BN(10).pow(new BN(DECIMALS)));
+    const TEN_BILLION = new BN(10000000000);
+    const initialSupply = TEN_BILLION.mul(new BN(10).pow(new BN(DECIMALS)));
 
     const ONE_TOKEN = new BN(1).mul(new BN(10).pow(new BN(DECIMALS)));
 

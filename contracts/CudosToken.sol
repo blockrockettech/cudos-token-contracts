@@ -8,10 +8,10 @@ contract CudosToken is ERC20, ERC20Detailed, WhitelistedRole {
 
     bool public transfersEnabled = false;
 
-    uint256 constant internal ONE_HUNDRED_BILLION = 100000000000;
+    uint256 constant internal TEN_BILLION = 10000000000;
 
     constructor () public ERC20Detailed("CudosToken", "CUDOS", 18) {
-        _mint(msg.sender, ONE_HUNDRED_BILLION * (10 ** uint256(decimals())));
+        _mint(msg.sender, TEN_BILLION * (10 ** uint256(decimals())));
     }
 
     function transfer(address recipient, uint256 amount) public returns (bool) {
