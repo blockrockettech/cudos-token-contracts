@@ -1,5 +1,7 @@
 build/
 
+coverage.json
+
 # Logs
 logs
 *.log
