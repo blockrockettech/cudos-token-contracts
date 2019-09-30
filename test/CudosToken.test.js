@@ -306,6 +306,12 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
         });
     });
 
+    //TODO
+
+    // ADD enabled transfer tests
+
+    //TODO
+
     // WhitelistAdmin
     shouldBehaveLikePublicRole(cudos, otherWhitelistAdmin, otherAccounts, 'WhitelistAdmin');
 

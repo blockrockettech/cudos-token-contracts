@@ -12,17 +12,17 @@ contract CudosToken is ERC20, ERC20Detailed, WhitelistedRole {
     uint256 constant internal ONE_HUNDRED_BILLION = 100000000000;
 
     constructor () public ERC20Detailed("CudosToken", "CUDOS", 18) {
-        _mint(msg.sender, ONE_HUNDRED_BILLION  * (10 ** uint256(decimals())));
+        _mint(msg.sender, ONE_HUNDRED_BILLION * (10 ** uint256(decimals())));
     }
 
     function transfer(address recipient, uint256 amount) public returns (bool) {
-        require(isWhitelisted(msg.sender), "Caller can not currently transfer");
+        require(isWhitelisted(msg.sender) || transfersEnabled, "Caller can not currently transfer");
 
         return super.transfer(recipient, amount);
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
-        require(isWhitelisted(msg.sender), "Caller can not currently transfer");
+        require(isWhitelisted(msg.sender) || transfersEnabled, "Caller can not currently transfer");
 
         return super.transferFrom(sender, recipient, amount);
     }
