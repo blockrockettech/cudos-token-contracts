@@ -1,3 +1,5 @@
+build/
+
 # Logs
 logs
 *.log
@@ -59,3 +61,7 @@ typings/
 
 # next.js build output
 .next
+
+.DS_Store
+.idea/
+cudos-token-contracts.iml
