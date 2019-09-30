@@ -123,17 +123,6 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
                 shouldDecreaseApproval(amount);
             });
         });
-
-        describe('when the spender is the zero address', function () {
-            const amount = initialSupply;
-            const spender = ZERO_ADDRESS;
-
-            it('reverts', async function () {
-                await shouldFail.reverting.withMessage(this.token.decreaseAllowance(
-                    spender, amount, {from: cudos}, 'ERC20: approve to the zero address')
-                );
-            });
-        });
     });
 
     describe('increase allowance', function () {

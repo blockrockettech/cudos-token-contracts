@@ -1,0 +1,5 @@
+const CudosToken = artifacts.require('CudosToken');
+
+module.exports = async function(deployer, network, accounts) {
+  await deployer.deploy(CudosToken);
+};
