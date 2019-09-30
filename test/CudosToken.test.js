@@ -307,11 +307,7 @@ contract('ERC20', function ([_, cudos, partner, anotherAccount, otherWhitelistAd
     });
 
     //TODO
-
-    // ADD enabled transfer tests
-
-    // test function enableTransfers() external onlyWhitelistAdmin {
-
+    
     // test transfer and transferFrom
 
     //TODO
